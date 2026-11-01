@@ -26,7 +26,7 @@ import { ConfirmDialog } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/providers/AuthProvider";
 import { deleteStudio, fetchMyListings } from "@/services/studio.service";
-import { fetchHostBookings } from "@/services/booking.service";
+import { fetchHostBookings, fetchMyBookings } from "@/services/booking.service";
 import { formatRate } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import type { Booking, BookingStatus, Studio } from "@/types";
@@ -49,6 +49,7 @@ export default function HostPanelPage() {
   const { user } = useAuth();
   const [listings, setListings] = useState<Studio[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [guestBookings, setGuestBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<BookingStatus | "All">("Pending");
@@ -59,12 +60,14 @@ export default function HostPanelPage() {
     setLoading(true);
     setError(null);
     try {
-      const [myListings, hostBookings] = await Promise.all([
+      const [myListings, hostBookings, myBookings] = await Promise.all([
         fetchMyListings(),
         fetchHostBookings(),
+        fetchMyBookings(),
       ]);
       setListings(myListings);
       setBookings(hostBookings);
+      setGuestBookings(myBookings);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not load the host panel.");
     } finally {
@@ -140,6 +143,21 @@ export default function HostPanelPage() {
             </Link>
           </div>
         </header>
+
+        <div className="mt-6 flex flex-col gap-3 rounded-lg border border-border bg-muted/50 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-muted-foreground">
+            <span className="font-medium text-foreground">This panel is for hosting.</span>{" "}
+            Requests for studios <span className="font-medium text-foreground">you own</span> land
+            below. Bookings you make as a guest stay in My Bookings
+            {loading ? "" : ` (${guestBookings.length} so far)`} and never appear here.
+          </p>
+          <Link href="/my-bookings" className="shrink-0">
+            <Button variant="outline" size="sm">
+              <CalendarClock className="h-4 w-4" /> My Bookings
+              {!loading && guestBookings.length > 0 ? ` (${guestBookings.length})` : ""}
+            </Button>
+          </Link>
+        </div>
 
         {error ? (
           <div className="mt-8">
@@ -273,7 +291,7 @@ export default function HostPanelPage() {
                   <EmptyState
                     icon={Building2}
                     title="You are not hosting yet"
-                    description="Publish your first studio to start receiving reservation requests."
+                    description="Publish your first studio to start receiving reservation requests. Bookings you made on other hosts' studios are in My Bookings, not here."
                     actionLabel="Add your first studio"
                     actionHref="/add-studio"
                   />

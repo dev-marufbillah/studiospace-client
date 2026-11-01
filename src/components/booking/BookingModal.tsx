@@ -79,7 +79,11 @@ export function BookingModal({ studio, open, onClose, onBooked }: BookingModalPr
         endTime,
       });
       toast.success("Booking requested!", {
-        description: "Your reservation is pending host confirmation.",
+        description: "Pending host confirmation — track it in My Bookings.",
+        action: {
+          label: "View my bookings",
+          onClick: () => router.push("/my-bookings"),
+        },
       });
       onBooked?.(booking);
       onClose();

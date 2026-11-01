@@ -167,9 +167,13 @@ export default function DashboardPage() {
                 <div>
                   <h2 id="incoming-heading" className="font-heading text-2xl font-semibold">
                     Incoming reservations
+                    <span className="ml-2 align-middle text-xs font-medium uppercase tracking-[0.15em] text-muted-foreground">
+                      as host
+                    </span>
                   </h2>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    Confirm or decline requests on the studios you host.
+                    Confirm or decline requests on the studios you host. Your own bookings as a
+                    guest are listed at the bottom of this page.
                   </p>
                 </div>
                 <Link
@@ -213,6 +217,9 @@ export default function DashboardPage() {
               <div className="flex flex-wrap items-end justify-between gap-2">
                 <h2 id="activity-heading" className="font-heading text-2xl font-semibold">
                   Your latest bookings
+                  <span className="ml-2 align-middle text-xs font-medium uppercase tracking-[0.15em] text-muted-foreground">
+                    as guest
+                  </span>
                 </h2>
                 <Link href="/my-bookings" className="text-sm font-medium text-primary hover:underline">
                   View all
