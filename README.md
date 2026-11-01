@@ -1,12 +1,62 @@
-# StudioSpace — Client (Next.js)
+# StudioSpace — Peer-to-Peer Creative Workspace & Studio Sharing Platform
 
-Peer-to-peer creative workspace marketplace frontend. Creators discover daylight studios, sound
-stages, podcast rooms and production spaces; hosts publish listings and confirm reservations.
+**🔗 Live site: <https://studiospace-delta.vercel.app>**
+**🔌 Live API: <https://studiospace-api-seven.vercel.app>** · health: [`/api/health`](https://studiospace-api-seven.vercel.app/api/health)
+**🖥️ API repository:** <https://github.com/dev-marufbillah/studiospace-server>
 
-- **Live site:** _not deployed yet — set this after the Vercel deploy (see “Deployment”)_
-- **API repo:** `../studiospace-server` (Express + TypeScript + MongoDB)
-- **Stack:** Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS 4 · Better Auth ·
-  Swiper · React Hook Form + Zod · Sonner · next-themes · jsPDF · Lucide
+StudioSpace is a marketplace for creators — filmmakers, photographers, podcasters and musicians.
+Hosts publish cyc-wall photo studios, sound stages, podcast lounges, music suites and workshops with
+hourly rates and deposits; creators search, filter, inspect availability and reserve real time slots
+that the host then confirms.
+
+- **Discover & book in one flow** — Swiper hero slider, six dynamically featured studios
+  (`.limit(6)`), five category tiles that deep-link into `/studios?category=…`, live search with
+  category / city / price / rating / capacity / amenity filters, four sort modes and pagination.
+- **Complete CRUD with real image uploads** — add, edit and delete studio listings (imgbb upload or
+  image URL, gallery, amenity/equipment tag editors, read-only owner name + email), managed from
+  *My Studio Listings* and the *Host Panel*, every destructive action behind a custom confirm modal.
+- **Secure auth & booking lifecycle** — Better Auth email/password + Google OAuth; a signed HTTPOnly
+  JWT authorises every mutation; bookings move Pending → Confirmed → Completed / Cancelled, with
+  double-booking prevention (HTTP 409), owner-only approval (403), server-side pricing and a
+  downloadable **PDF invoice** for confirmed bookings.
+- **Built for demos, not just happy paths** — Sonner toasts everywhere (no `window.alert`), branded
+  skeletons, friendly empty states, custom 404 + error boundary, light/dark theme toggle, wishlist
+  hearts, and layouts verified on mobile, tablet and desktop.
+- **Tech stack** — Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS 4 · Better Auth
+  (MongoDB adapter) · Swiper · React Hook Form + Zod · Sonner · next-themes · jsPDF · Lucide icons ·
+  Express 5 + TypeScript + MongoDB Atlas on the API side.
+
+## Examiner quick start
+
+| Role | Email | Password | What it unlocks |
+| --- | --- | --- | --- |
+| Host (owns 6 seeded studios) | `host.test@studiospace.dev` | `Studio123` | Host Panel, My Studio Listings, confirm/decline incoming bookings |
+| Renter | `guest.test@studiospace.dev` | `Studio123` | Existing bookings, wishlist, booking flow |
+
+- **Confirm a booking:** sign in as the host → `/host` (or `/dashboard`) → *Incoming reservations* →
+  a **Pending** request is already waiting (Luminous Daylight Photo Studio) → **Confirm**.
+- **Double-booking proof:** with that booking confirmed, try booking the same studio and date for an
+  overlapping time → toast *“This studio is already booked for the selected time…”* (HTTP 409).
+- **Ownership proof:** while signed in as the renter, `PATCH /api/host/bookings/<id>/status` → `401`/`403`;
+  opening `/studios/edit/<someone-else-id>` shows the “Not your listing” panel.
+- **Google login** works once `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` are set; without them the
+  button shows a friendly toast instead of failing silently.
+
+## Local setup (two terminals)
+
+```bash
+# 1) API — http://localhost:5001
+git clone https://github.com/dev-marufbillah/studiospace-server && cd studiospace-server
+npm install --legacy-peer-deps
+cp .env.example .env        # fill MONGODB_URI, JWT_SECRET, INTERNAL_API_SECRET
+npm run seed && npm run dev
+
+# 2) Web — http://localhost:3000
+git clone https://github.com/dev-marufbillah/studiospace-client && cd studiospace-client
+npm install --legacy-peer-deps
+cp .env.example .env.local  # same MONGODB_URI + INTERNAL_API_SECRET, BETTER_AUTH_SECRET
+npm run dev
+```
 
 ---
 
@@ -24,20 +74,19 @@ stages, podcast rooms and production spaces; hosts publish listings and confirm 
 
 ---
 
-## Screenshots
+## Live tour (open these on the deployed site)
 
-> Placeholder section — capture these after the first deploy (or from your local dev server):
->
-> | View | Suggested file |
-> | --- | --- |
-> | Homepage hero | `docs/screenshots/home.png` |
-> | Explore studios + filters | `docs/screenshots/explore.png` |
-> | Studio detail | `docs/screenshots/studio-detail.png` |
-> | Booking modal | `docs/screenshots/booking.png` |
-> | Dashboard | `docs/screenshots/dashboard.png` |
-> | Dark theme | `docs/screenshots/dark-theme.png` |
+| Page | Link |
+| --- | --- |
+| Home — hero slider, featured studios, categories | <https://studiospace-delta.vercel.app> |
+| Explore studios — filters, sorting, pagination | <https://studiospace-delta.vercel.app/studios> |
+| Studio detail — gallery, reviews, booking modal | <https://studiospace-delta.vercel.app/studios/6ae769176c4132584c18f934> |
+| Login / Register | <https://studiospace-delta.vercel.app/login> · <https://studiospace-delta.vercel.app/register> |
+| Host Panel (sign in as host) | <https://studiospace-delta.vercel.app/host> |
+| My Studio Listings · My Bookings · Wishlist | `/my-listings` · `/my-bookings` · `/wishlist` |
 
-Placeholder editorial imagery ships in `public/images/` (hero + one photo per category + fallback).
+Placeholder editorial imagery ships in `public/images/` (hero + one photo per category + fallback),
+so the site never shows a broken image, even offline.
 
 ---
 
@@ -124,30 +173,34 @@ Footer: brand + mission · quick links · 6 categories · socials (IG/FB/LinkedI
 
 ---
 
-## Deployment (Vercel)
+## Deployment (Vercel — live)
 
-1. Push this repo to GitHub, import it in Vercel, framework preset **Next.js**.
-2. Add every variable from the table above (`NEXT_PUBLIC_API_URL`/`API_URL` = your Render URL,
-   `NEXT_PUBLIC_APP_URL`/`BETTER_AUTH_URL` = the Vercel domain).
-3. Set the server's `CLIENT_URL` to the Vercel domain so credentialed CORS matches.
-4. Add `https://<vercel-domain>/api/auth/callback/google` to the Google OAuth client.
-5. Deploy, then test every route with a hard refresh (no 404s, session survives reload).
+Both apps run on Vercel; the API is a single serverless function that boots the same Express app
+used locally (`api/index.js` + a `vercel.json` rewrite that forwards the original URL).
+
+1. **Web:** <https://studiospace-delta.vercel.app> — framework preset **Next.js**.
+2. **API:** <https://studiospace-api-seven.vercel.app> — Node function, `includeFiles: dist/**`.
+3. Web env: `NEXT_PUBLIC_API_URL` / `API_URL` = the API domain, `NEXT_PUBLIC_APP_URL` /
+   `BETTER_AUTH_URL` / `TRUSTED_ORIGINS` = the web domain, plus `MONGODB_URI`, `DB_NAME`,
+   `BETTER_AUTH_SECRET` and the shared `INTERNAL_API_SECRET`.
+4. API env: `MONGODB_URI`, `DB_NAME`, `JWT_SECRET`, `INTERNAL_API_SECRET`, `CLIENT_URL` = web domain.
+5. Google OAuth redirect URI: `https://studiospace-delta.vercel.app/api/auth/callback/google`.
+6. Redeploy → hard-refresh every route (no 404s, session survives reload).
 
 ---
 
 ## Examiner / testing guide
 
-No credentials are invented. Two accounts were created through the **real registration flow** against
-the current development database — treat them as throwaway dev accounts and create your own if you
-prefer:
+Two accounts were created through the **real registration flow** against the production database and
+are ready to use on the live site (the host already owns six listings and has bookings):
 
 | Role | Email | Password |
 | --- | --- | --- |
 | Host | `host.test@studiospace.dev` | `Studio123` |
 | Renter | `guest.test@studiospace.dev` | `Studio123` |
 
-> If you deploy with a fresh database, register new accounts instead — the table above only exists
-> in the database that was seeded during development.
+> If you deploy against a fresh database, register new accounts instead — these two live in the
+> Atlas database the production deployment points at.
 
 **Register / log in.** `/register` → name, email, optional photo URL, password (min 6 chars, at least
 one uppercase and one lowercase) → redirected to `/login` (registration intentionally does not
@@ -161,11 +214,11 @@ total preview → *Confirm Booking* → booking appears as **Pending** in `/my-b
 `/dashboard` → *Incoming reservations* shows it for the host.
 
 **Who confirms a booking?** There is no separate admin panel: the **host who owns the
-studio** confirms it. Sign in as the host → `/dashboard` → *Incoming reservations* →
-**Confirm** (or *Decline*). Seeded demo listings belong to a placeholder host nobody can
-log in as, so if you book a seeded studio the request stays *Pending*. Either register a
-second account and create your own listing, or make your account the host of the seeded
-listings with the server's `npm run make-host -- you@example.com`.
+studio** confirms it. Sign in as `host.test@studiospace.dev` → `/host` (or `/dashboard`) →
+*Incoming reservations* → **Confirm** (or *Decline*). That account already owns six seeded
+studios (Luminous Daylight, Sound Stage One, The Quiet Room, Harmony Recording Suite,
+Terracotta Art Workshop, Atelier Creative Workspace) and has a **Pending** request waiting,
+so the reviewer can complete the full lifecycle without setting anything up.
 
 **Owner permissions.** As the host, confirm the request. As another account, try
 `PATCH /api/host/bookings/<id>/status` with your own booking → `403`. Editing someone else's studio
