@@ -51,9 +51,37 @@ function assertPasswordPolicy(password: string): void {
 const googleClientId = process.env.GOOGLE_CLIENT_ID;
 const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
 
+/**
+ * Better Auth rejects sign-in requests whose Origin is not trusted with the
+ * error "Invalid origin". `BETTER_AUTH_URL` only covers ONE origin, but Next
+ * falls back to another port (3000 -> 3001 -> 3002) whenever the previous one
+ * is busy. So: trust the configured URL, any extra origins from
+ * TRUSTED_ORIGINS (comma separated) and, outside production, the usual local
+ * dev ports on both localhost and 127.0.0.1.
+ */
+const baseUrl = process.env.BETTER_AUTH_URL || "http://localhost:3000";
+
+const configuredOrigins = (process.env.TRUSTED_ORIGINS ?? "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+const devOrigins =
+  process.env.NODE_ENV === "production"
+    ? []
+    : ["3000", "3001", "3002", "3003"].flatMap((port) => [
+        `http://localhost:${port}`,
+        `http://127.0.0.1:${port}`,
+      ]);
+
+const trustedOrigins = Array.from(
+  new Set([baseUrl, ...configuredOrigins, ...devOrigins])
+);
+
 export const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET,
-  baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
+  baseURL: baseUrl,
+  trustedOrigins,
   // Plural collection names: users / sessions / accounts / verifications —
   // the `users` collection is also read by the Express profile endpoints.
   database: mongodbAdapter(db, { client, usePlural: true, transaction: false }),
