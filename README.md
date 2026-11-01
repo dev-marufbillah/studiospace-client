@@ -14,7 +14,8 @@ that the host then confirms.
   category / city / price / rating / capacity / amenity filters, four sort modes and pagination.
 - **Complete CRUD with real image uploads** — add, edit and delete studio listings (imgbb upload or
   image URL, gallery, amenity/equipment tag editors, read-only owner name + email), managed from
-  *My Studio Listings* and the *Host Panel*, every destructive action behind a custom confirm modal.
+  the required **My Studio Listings** page (`/my-listings`) and — as a bonus — the *Host Panel*
+  (`/host`), every destructive action behind a custom confirm modal.
 - **Secure auth & booking lifecycle** — Better Auth email/password + Google OAuth; a signed HTTPOnly
   JWT authorises every mutation; bookings move Pending → Confirmed → Completed / Cancelled, with
   double-booking prevention (HTTP 409), owner-only approval (403), server-side pricing and a
@@ -41,6 +42,27 @@ that the host then confirms.
   opening `/studios/edit/<someone-else-id>` shows the “Not your listing” panel.
 - **Google login** works once `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` are set; without them the
   button shows a friendly toast instead of failing silently.
+
+## Who owns what — listings and booking confirmations
+
+This follows the brief exactly: **a listing belongs to the account that created it**, and the
+owner-scoped pages read that ownership from the stored `ownerId` / `ownerEmail` on the studio
+document (`/api/my-listings` filters by owner, it does not filter by role).
+
+- **My Studio Listings (`/my-listings`)** — required page: *“showing user-owned spaces (ownerEmail
+  match) with Update and Delete buttons.”* A brand-new account therefore has **0 listings** until it
+  publishes one with **Add New Studio**; the table is empty by design, not by error.
+- **Who confirms a booking?** The brief leaves booking management to the studio owner, so the
+  **owner of that listing** is the only account allowed to move a request from `Pending` to
+  `Confirmed` / `Completed`. Anyone else gets **403** (`You are not authorized to manage this
+  booking.`) and an unauthenticated request gets **401**.
+- **Host Panel (`/host`) is a bonus, not a brief requirement.** It is a convenience screen built on
+  top of the same owner-scoped data: counts of active listings / pending / confirmed / booked value,
+  status tabs and one-click Confirm · Mark completed · Decline, plus the owners' listing manager.
+  Everything it does is also reachable through the required pages (`/my-listings`,
+  `/studios/edit/[id]`, `/dashboard`).
+- **What an examiner sees:** the seeded database gives `host.test@studiospace.dev` six listings and a
+  **Pending** request, so the whole owner flow can be demonstrated without creating data first.
 
 ## Local setup (two terminals)
 
