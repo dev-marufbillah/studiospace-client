@@ -1,0 +1,139 @@
+@import "tailwindcss";
+
+/* Class-based dark mode (next-themes toggles .dark on <html>). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+  StudioSpace design tokens — Luxury Minimalist Editorial.
+  Light theme (warm ivory) is the approved default; the dark theme keeps
+  the same terracotta/taupe brand identity with readable contrast.
+*/
+:root {
+  --background: #faf7f2;
+  --foreground: #2a2521;
+  --surface: #ffffff;
+  --surface-muted: #f4eee3;
+  --muted: #efe7d9;
+  --muted-foreground: #6e635a;
+  --border: #e7dece;
+  --input: #ddd2be;
+  --primary: #b75d42;
+  --primary-foreground: #fdfbf7;
+  --primary-hover: #a04f37;
+  --accent: #ede4d3;
+  --accent-foreground: #2a2521;
+  --secondary: #a89a8c;
+  --destructive: #c2413b;
+  --destructive-foreground: #ffffff;
+  --ring: rgba(183, 93, 66, 0.45);
+  --star: #c98a3d;
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: #17130f;
+  --foreground: #efe8de;
+  --surface: #201b16;
+  --surface-muted: #27211a;
+  --muted: #2d261e;
+  --muted-foreground: #a89a8c;
+  --border: #3b332b;
+  --input: #4a4036;
+  --primary: #d98b70;
+  --primary-foreground: #1a1512;
+  --primary-hover: #e3a086;
+  --accent: #2d261e;
+  --accent-foreground: #efe8de;
+  --secondary: #8d8073;
+  --destructive: #e0655c;
+  --destructive-foreground: #ffffff;
+  --ring: rgba(217, 139, 112, 0.5);
+  --star: #e0a95f;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-secondary: var(--secondary);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-ring: var(--ring);
+  --color-star: var(--star);
+
+  --font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-cormorant-garamond), ui-serif, Georgia, serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  text-rendering: optimizeLegibility;
+}
+
+/* Editorial serif headings share one treatment across the site. */
+h1,
+h2,
+h3,
+h4,
+.font-heading {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+::selection {
+  background-color: color-mix(in srgb, var(--primary) 30%, transparent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Thin warm scrollbar (progressive enhancement). */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--input) transparent;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  /* Hide horizontal scrollbar on carousels without hiding content. */
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Swiper hero pagination — brand-colored bullets. */
+.swiper-pagination-bullet {
+  background: #ffffff;
+  opacity: 0.45;
+  width: 10px;
+  height: 10px;
+}
+.swiper-pagination-bullet-active {
+  opacity: 1;
+  background: var(--primary);
+  transform: scale(1.15);
+}
