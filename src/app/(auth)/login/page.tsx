@@ -34,10 +34,17 @@ function LoginContent() {
   // Better Auth sends failed Google round-trips back with ?error=<code>.
   useEffect(() => {
     if (!oauthError) return;
+    const messages: Record<string, string> = {
+      access_denied: "Google sign-in was cancelled. Try again whenever you are ready.",
+      account_not_linked:
+        "That Google email is already registered with a password. Sign in with your password, then use Google next time.",
+      email_not_found:
+        "Google did not share an email address. Try another Google account.",
+      state_mismatch: "The Google sign-in session expired. Please try again.",
+    };
     const message =
-      oauthError === "access_denied"
-        ? "Google sign-in was cancelled. Try again whenever you are ready."
-        : `Google sign-in failed (${oauthError}). Please use email and password or retry.`;
+      messages[oauthError] ??
+      `Google sign-in failed (${oauthError}). Please use email and password or retry.`;
     toast.error(message);
   }, [oauthError]);
 

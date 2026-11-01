@@ -99,6 +99,19 @@ export const auth = betterAuth({
         verifyPassword({ hash, password }),
     },
   },
+  /**
+   * Google sign-in must attach to an existing account when the email already
+   * exists (people register with email/password first, then try the Google
+   * button). Without this, Better Auth refuses with `account_not_linked`.
+   * Only Google is trusted, and the email must match exactly.
+   */
+  account: {
+    accountLinking: {
+      enabled: true,
+      trustedProviders: ["google"],
+      allowDifferentEmails: false,
+    },
+  },
   ...(googleClientId && googleClientSecret
     ? {
         socialProviders: {
