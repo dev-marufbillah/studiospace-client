@@ -113,6 +113,11 @@ export default function DashboardPage() {
                 <CalendarClock className="h-4 w-4" /> My Bookings
               </Button>
             </Link>
+            <Link href="/host">
+              <Button variant="outline" size="sm">
+                <Building2 className="h-4 w-4" /> Host Panel
+              </Button>
+            </Link>
           </div>
         </header>
 

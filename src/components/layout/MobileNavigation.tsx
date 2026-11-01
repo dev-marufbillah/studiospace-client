@@ -85,6 +85,13 @@ export function MobileNavigation({ open, onClose }: MobileNavigationProps) {
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-2">
                 <Link
+                  href="/host"
+                  onClick={onClose}
+                  className="col-span-2 rounded-md bg-primary px-3 py-2.5 text-center text-sm font-semibold text-primary-foreground hover:bg-primary-hover"
+                >
+                  Host Panel
+                </Link>
+                <Link
                   href="/dashboard"
                   onClick={onClose}
                   className="rounded-md border border-border px-3 py-2.5 text-center text-sm font-medium hover:bg-accent"

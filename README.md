@@ -18,7 +18,7 @@ stages, podcast rooms and production spaces; hosts publish listings and confirm 
 | Explore | Server-side search, category/city/price/rating/capacity/amenity filters, 4 sort modes, pagination, URL query sync, mobile filter drawer, no-results state |
 | Studio detail | Gallery with thumbnails, specs, host card, amenity/equipment chips, reviews with star rating, booking modal |
 | Booking | Date + start/end time, live total preview, server-authoritative pricing, Sonner toasts, status pills, cancellation with confirm dialog, PDF invoice for confirmed bookings |
-| Hosting | Add studio (imgbb upload + gallery + tag editors), edit studio, my listings, delete with confirmation, dashboard with incoming reservation confirm/decline/complete |
+| Hosting | **Host Panel** (`/host`, reachable from the navbar host icon) with pending-request tabs, listing manager and booked value; add studio (imgbb upload + gallery + tag editors), edit studio, my listings, delete with confirmation |
 | Account | Email/password auth (Better Auth), Google OAuth, profile editing, wishlist, theme toggle (light default), protected routes via `src/proxy.ts` |
 | States | Skeleton loaders, branded empty states, error panels with retry, custom 404, route error boundary, image fallbacks — no `window.alert` anywhere |
 
@@ -90,7 +90,7 @@ Never commit `.env*` files. Only `NEXT_PUBLIC_*` variables reach the browser.
 **Public:** `/` · `/studios` · `/studios/[id]` · `/about` · `/how-it-works` · `/terms` · `/privacy` ·
 `/login` · `/register`
 
-**Private** (proxy-protected, `callbackUrl` round-trip): `/add-studio` · `/my-listings` ·
+**Private** (proxy-protected, `callbackUrl` round-trip): `/host` · `/add-studio` · `/my-listings` ·
 `/studios/edit/[id]` · `/my-bookings` · `/dashboard` · `/profile` · `/wishlist`
 
 **System:** `not-found.tsx` (custom 404) · `error.tsx` · `loading.tsx` · `/api/auth/[...all]` ·
@@ -100,8 +100,9 @@ Never commit `.env*` files. Only `NEXT_PUBLIC_*` variables reach the browser.
 
 ```
 Navbar: Home · Explore Studios · How It Works · About Us
-        (auth) avatar → Dashboard · Add New Studio · My Studio Listings ·
-                         My Bookings · Wishlist · Profile · Logout
+        (auth) host icon → Host Panel (/host)
+        (auth) avatar → Host Panel · Dashboard · Add New Studio ·
+                         My Studio Listings · My Bookings · Wishlist · Profile · Logout
         (guest) Log in · Sign up
 Footer: brand + mission · quick links · 6 categories · socials (IG/FB/LinkedIn/X) · newsletter
 ```
@@ -158,6 +159,13 @@ image (needs `IMGBB_API_KEY`) or paste a URL → publish → redirected to `/my-
 **Book a studio.** Open any `/studios/[id]` → *Book This Studio* → pick a future date and times →
 total preview → *Confirm Booking* → booking appears as **Pending** in `/my-bookings`;
 `/dashboard` → *Incoming reservations* shows it for the host.
+
+**Who confirms a booking?** There is no separate admin panel: the **host who owns the
+studio** confirms it. Sign in as the host → `/dashboard` → *Incoming reservations* →
+**Confirm** (or *Decline*). Seeded demo listings belong to a placeholder host nobody can
+log in as, so if you book a seeded studio the request stays *Pending*. Either register a
+second account and create your own listing, or make your account the host of the seeded
+listings with the server's `npm run make-host -- you@example.com`.
 
 **Owner permissions.** As the host, confirm the request. As another account, try
 `PATCH /api/host/bookings/<id>/status` with your own booking → `403`. Editing someone else's studio

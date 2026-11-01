@@ -13,6 +13,7 @@ import { AUTH_JWT_COOKIE } from "@/lib/constants";
 
 const PRIVATE_ROUTES = [
   "/dashboard",
+  "/host",
   "/profile",
   "/wishlist",
   "/my-bookings",
@@ -52,6 +53,7 @@ export default function proxy(request: NextRequest) {
 export const config = {
   matcher: [
     "/dashboard/:path*",
+    "/host/:path*",
     "/profile/:path*",
     "/wishlist/:path*",
     "/my-bookings/:path*",

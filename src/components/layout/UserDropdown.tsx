@@ -16,6 +16,7 @@ import { getInitials } from "@/lib/utils";
 import type { AuthUser } from "@/types";
 
 const MENU_ITEMS = [
+  { href: "/host", label: "Host Panel", icon: Store },
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/add-studio", label: "Add New Studio", icon: PlusCircle },
   { href: "/my-listings", label: "My Studio Listings", icon: Store },

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Aperture, Menu } from "lucide-react";
+import { Aperture, Menu, Store } from "lucide-react";
 import { NAV_LINKS } from "@/lib/constants";
 import { useAuth } from "@/providers/AuthProvider";
 import { Button } from "@/components/ui/button";
@@ -69,9 +69,27 @@ export function Navbar() {
               aria-hidden="true"
             />
           ) : user ? (
-            <div className="hidden md:block">
-              <UserDropdown user={user} />
-            </div>
+            <>
+              {/* Host panel entry point — only shown to signed-in accounts. */}
+              <Link
+                href="/host"
+                aria-label="Host panel"
+                title="Host panel"
+                aria-current={pathname.startsWith("/host") ? "page" : undefined}
+                className={cn(
+                  "flex h-9 items-center gap-1.5 rounded-full border px-2.5 text-sm font-medium transition-colors sm:px-3",
+                  pathname.startsWith("/host")
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border bg-surface text-foreground hover:border-primary hover:text-primary"
+                )}
+              >
+                <Store className="h-4 w-4" aria-hidden="true" />
+                <span className="hidden sm:inline">Host</span>
+              </Link>
+              <div className="hidden md:block">
+                <UserDropdown user={user} />
+              </div>
+            </>
           ) : (
             <div className="hidden items-center gap-2 md:flex">
               <Link href="/login">
