@@ -81,6 +81,20 @@ function LoginContent() {
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
               <Label htmlFor="password">Password</Label>
+              {/* Shown for parity with the brief; reset is intentionally not
+                  implemented, so the link explains itself instead of dead-ending. */}
+              <button
+                type="button"
+                onClick={() =>
+                  toast.info("Password reset is not enabled", {
+                    description:
+                      "This release has no email verification or reset flow. Create a new account, or sign in with Google.",
+                  })
+                }
+                className="text-xs font-medium text-primary hover:underline"
+              >
+                Forgot password?
+              </button>
               <button
                 type="button"
                 onClick={() => setShowPassword((value) => !value)}
