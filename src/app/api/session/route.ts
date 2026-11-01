@@ -23,6 +23,28 @@ async function readSession() {
   return session;
 }
 
+/**
+ * GET: diagnostics. Open http://localhost:3000/api/session in the browser to
+ * see whether Better Auth really sees a session and which cookies arrived —
+ * the fastest way to debug "signed in but redirected to /login".
+ */
+export async function GET(): Promise<NextResponse> {
+  const session = await readSession();
+  const cookieStore = await cookies();
+  return NextResponse.json({
+    success: true,
+    message: session?.user ? "Session is active." : "No active session.",
+    data: {
+      authenticated: Boolean(session?.user),
+      user: session?.user
+        ? { id: session.user.id, email: session.user.email, name: session.user.name }
+        : null,
+      hasJwtCookie: cookieStore.has(AUTH_JWT_COOKIE),
+      cookieNames: cookieStore.getAll().map((cookie) => cookie.name),
+    },
+  });
+}
+
 export async function POST(): Promise<NextResponse> {
   const session = await readSession();
   if (!session?.user) {
