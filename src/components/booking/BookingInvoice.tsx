@@ -5,7 +5,7 @@ import autoTable from "jspdf-autotable";
 import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { formatDate, formatLongDate, formatRate } from "@/lib/utils";
+import { formatDate, formatDuration, formatLongDate, formatRate } from "@/lib/utils";
 import type { Booking } from "@/types";
 
 interface BookingInvoiceProps {
@@ -54,7 +54,7 @@ export function generateInvoicePdf(booking: Booking): void {
       ["Booking ID", booking.id],
       ["Booking date", formatLongDate(booking.bookingDate)],
       ["Time slot", `${booking.startTime} – ${booking.endTime}`],
-      ["Duration", `${booking.duration} hour${booking.duration === 1 ? "" : "s"}`],
+      ["Duration", formatDuration(booking.duration)],
       ["Status", booking.status],
     ],
   });
@@ -82,7 +82,10 @@ export function generateInvoicePdf(booking: Booking): void {
     margin: { left: 260, right: 40 },
     columnStyles: { 0: { cellWidth: 140, fontStyle: "bold" }, 1: { halign: "right" } },
     body: [
-      [`Hourly rate (${booking.duration}h)`, formatRate(booking.hourlyRate * booking.duration)],
+      [
+        `Hourly rate × ${formatDuration(booking.duration)}`,
+        formatRate(booking.hourlyRate * booking.duration),
+      ],
       ["Security deposit", formatRate(booking.securityDeposit)],
       ["Total paid at confirmation", formatRate(booking.totalPrice)],
     ],

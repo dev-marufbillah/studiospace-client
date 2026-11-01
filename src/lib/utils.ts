@@ -36,6 +36,19 @@ export function formatLongDate(value: string | Date): string {
   }).format(date);
 }
 
+/**
+ * "2h 35m" — bookings store fractional hours (10:25–13:00 = 2.5833…h),
+ * which must never be rendered raw.
+ */
+export function formatDuration(hours: number): string {
+  if (!Number.isFinite(hours) || hours <= 0) return "0h";
+  const totalMinutes = Math.round(hours * 60);
+  const wholeHours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  if (wholeHours === 0) return `${minutes}m`;
+  return minutes === 0 ? `${wholeHours}h` : `${wholeHours}h ${minutes}m`;
+}
+
 /** "10:00" -> 600 (minutes since midnight). */
 export function timeToMinutes(value: string): number {
   const [hoursRaw, minutesRaw] = value.split(":");

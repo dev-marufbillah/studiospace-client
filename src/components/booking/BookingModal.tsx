@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/providers/AuthProvider";
 import { createBooking } from "@/services/booking.service";
-import { formatRate, timeToMinutes } from "@/lib/utils";
+import { formatDuration, formatRate, timeToMinutes } from "@/lib/utils";
 import type { Booking, Studio } from "@/types";
 
 interface BookingModalProps {
@@ -156,7 +156,7 @@ export function BookingModal({ studio, open, onClose, onBooked }: BookingModalPr
               <div className="flex justify-between">
                 <dt className="text-muted-foreground">Duration</dt>
                 <dd className="font-medium">
-                  {pricing ? `${pricing.duration} hour${pricing.duration === 1 ? "" : "s"}` : "—"}
+                  {pricing ? formatDuration(pricing.duration) : "—"}
                 </dd>
               </div>
               <div className="flex justify-between">

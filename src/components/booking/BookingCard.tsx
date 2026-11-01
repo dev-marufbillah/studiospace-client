@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/dialog";
 import { BookingInvoice } from "@/components/booking/BookingInvoice";
 import { cancelBooking } from "@/services/booking.service";
-import { formatDate, formatRate } from "@/lib/utils";
+import { formatDate, formatDuration, formatRate } from "@/lib/utils";
 import type { Booking } from "@/types";
 
 interface BookingCardProps {
@@ -77,7 +77,7 @@ export function BookingCard({ booking, onChanged, studioImageUrl }: BookingCardP
               <Clock className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
               <dt className="sr-only">Time</dt>
               <dd>
-                {booking.startTime} – {booking.endTime} · {booking.duration}h
+                {booking.startTime} – {booking.endTime} · {formatDuration(booking.duration)}
               </dd>
             </div>
             <div className="flex items-center gap-2 text-muted-foreground">

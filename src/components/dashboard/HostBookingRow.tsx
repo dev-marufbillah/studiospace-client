@@ -7,7 +7,7 @@ import { StatusBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/dialog";
 import { updateHostBookingStatus } from "@/services/booking.service";
-import { formatDate, formatRate } from "@/lib/utils";
+import { formatDate, formatDuration, formatRate } from "@/lib/utils";
 import type { Booking, BookingStatus } from "@/types";
 
 interface HostBookingRowProps {
@@ -75,7 +75,7 @@ export function HostBookingRow({ booking, onChanged }: HostBookingRowProps) {
           <Clock className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
           <dt className="sr-only">Time</dt>
           <dd>
-            {booking.startTime}–{booking.endTime} · {booking.duration}h
+            {booking.startTime}–{booking.endTime} · {formatDuration(booking.duration)}
           </dd>
         </div>
       </dl>
