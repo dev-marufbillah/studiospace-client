@@ -64,6 +64,41 @@ document (`/api/my-listings` filters by owner, it does not filter by role).
 - **What an examiner sees:** the seeded database gives `host.test@studiospace.dev` six listings and a
   **Pending** request, so the whole owner flow can be demonstrated without creating data first.
 
+## Step by step: try the host flow in two minutes
+
+**1 · Sign in first — every private route needs a session.**
+`/host`, `/dashboard`, `/my-listings`, `/add-studio`, `/my-bookings`, `/profile` and `/wishlist` are
+guarded by `src/proxy.ts`. Without a Better Auth cookie the page answers `307 → /login?callbackUrl=<route>`
+and returns you to the same route after signing in. Opening `/host` in a fresh window, an incognito
+tab, a different browser or after clearing cookies therefore looks like “the host panel does not
+work” — it is the login guard, not a bug.
+
+**2 · Use the seeded host.** Sign in at `/login` with `host.test@studiospace.dev` / `Studio123`. The
+navbar then shows the name and avatar, and the **Host** button (next to the theme toggle) opens
+`/host` with **6 active listings · 2 pending requests**.
+
+**3 · Publish your own listing (optional).** *Add New Studio* → fill title, category, hourly rate,
+deposit, capacity, address, overview, image URL, gallery, amenities → **Publish**. The new studio is
+owned by the account that created it and appears immediately in *My Studio Listings* (`/my-listings`)
+and in the Host Panel.
+
+**4 · Approve a reservation.** `/host` → *Incoming reservations* → **Pending** tab → **Confirm**.
+The request moves to *Confirmed*, the *Confirmed* and *Booked value* counters go up, and the slot is
+locked. **Mark completed** closes it out; **Decline** frees the slot again.
+
+**5 · Prove the rules hold.**
+| Test | Expected |
+| --- | --- |
+| Renter books the same studio, same date, overlapping time after a confirmation | toast “This studio is already booked…” — HTTP **409** |
+| A different signed-in account calls `PATCH /api/host/bookings/<id>/status` | **403** `You are not authorized to manage this booking.` |
+| The same call with no cookie, or `POST /api/studios` without a cookie | **401** |
+| Opening `/studios/edit/<someone-else-id>` | “Not your listing” panel |
+| Host tries to book their own studio | **400** |
+
+**If `/host` keeps bouncing to `/login`:** close every tab of the site, sign in once in a fresh
+window, make sure third-party cookies are not blocked, then retry. The route is a `307` for any
+request without a session cookie — that response is the fastest way to confirm you are simply signed out.
+
 ## Local setup (two terminals)
 
 ```bash
