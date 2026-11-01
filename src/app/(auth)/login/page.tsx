@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -29,6 +29,17 @@ function LoginContent() {
   const [submitting, setSubmitting] = useState(false);
 
   const callbackUrl = searchParams.get("callbackUrl") || "/";
+  const oauthError = searchParams.get("error");
+
+  // Better Auth sends failed Google round-trips back with ?error=<code>.
+  useEffect(() => {
+    if (!oauthError) return;
+    const message =
+      oauthError === "access_denied"
+        ? "Google sign-in was cancelled. Try again whenever you are ready."
+        : `Google sign-in failed (${oauthError}). Please use email and password or retry.`;
+    toast.error(message);
+  }, [oauthError]);
 
   const {
     register,

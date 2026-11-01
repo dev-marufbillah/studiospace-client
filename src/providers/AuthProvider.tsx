@@ -115,10 +115,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       errorCallbackURL: "/login",
     });
     if (error) {
-      throw new Error(
-        error.message ??
-          "Google sign-in is not configured. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET."
-      );
+      // Better Auth answers PROVIDER_NOT_FOUND when the Google credentials are
+      // missing from .env.local — translate it into actionable guidance.
+      if (error.code === "PROVIDER_NOT_FOUND" || /provider/i.test(error.message ?? "")) {
+        throw new Error(
+          "Google sign-in is not configured on this deployment. Add GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET to .env.local, or continue with email and password."
+        );
+      }
+      throw new Error(error.message ?? "Google sign-in failed.");
     }
     // On success the browser navigates to Google; session resumes on return.
   }, []);
