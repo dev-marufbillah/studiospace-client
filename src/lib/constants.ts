@@ -83,5 +83,11 @@ export const FOOTER_CATEGORIES = [
  */
 export const AUTH_JWT_COOKIE = "studiospace_session";
 
-/** Better Auth session cookie (navigation protection only). */
-export const BETTER_AUTH_SESSION_COOKIE = "better_auth.session_token";
+/**
+ * Better Auth session cookie. Better Auth's default prefix is `better-auth`
+ * (hyphen), and production HTTPS deployments prepend `__Secure-`, so the
+ * proxy matches on the suffix instead of a single literal name.
+ */
+export const BETTER_AUTH_SESSION_COOKIE = "better-auth.session_token";
+
+export const BETTER_AUTH_SESSION_SUFFIX = "session_token";

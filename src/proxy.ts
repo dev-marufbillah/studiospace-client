@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { BETTER_AUTH_SESSION_COOKIE } from "@/lib/constants";
+import { BETTER_AUTH_SESSION_SUFFIX } from "@/lib/constants";
 
 /**
  * Next.js 16 proxy (formerly middleware.ts) — navigation protection for
@@ -29,7 +29,12 @@ export default function proxy(request: NextRequest) {
 
   if (!isPrivate) return NextResponse.next();
 
-  const hasSession = request.cookies.has(BETTER_AUTH_SESSION_COOKIE);
+  // Cookie name is `better-auth.session_token` in dev and
+  // `__Secure-better-auth.session_token` on HTTPS — and Better Auth may
+  // split large values into `.0`, `.1` chunks. Match on the suffix.
+  const hasSession = request.cookies
+    .getAll()
+    .some((cookie) => cookie.name.endsWith(BETTER_AUTH_SESSION_SUFFIX) && cookie.value !== "");
   if (hasSession) return NextResponse.next();
 
   const loginUrl = new URL("/login", request.url);

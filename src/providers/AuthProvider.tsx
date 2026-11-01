@@ -93,6 +93,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (error) {
         throw new Error(error.message ?? "Registration failed. Please try again.");
       }
+      // Better Auth signs the new user in automatically. The assignment
+      // requires "registration success -> Login page", so the auto session is
+      // cleared to avoid a signed-in navbar sitting on top of the login form.
+      try {
+        await authClient.signOut();
+      } catch {
+        /* non-fatal: the login page still works */
+      }
+      await fetch("/api/session", { method: "DELETE", credentials: "include" });
+      mintedRef.current = false;
+      setUser(null);
     },
     []
   );

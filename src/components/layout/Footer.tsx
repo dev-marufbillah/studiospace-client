@@ -13,10 +13,9 @@ import { FOOTER_CATEGORIES, NAV_LINKS } from "@/lib/constants";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 
-const QUICK_LINKS = [
-  ...NAV_LINKS,
-  { href: "/studios", label: "Explore Studios" },
-] as const;
+// NAV_LINKS already contains Home, Explore Studios, How It Works and About Us.
+// (Duplicating an entry here produced duplicate React keys and duplicate links.)
+const QUICK_LINKS = NAV_LINKS;
 
 const SOCIAL_LINKS = [
   { href: "https://www.instagram.com/", label: "Instagram", icon: InstagramIcon },
@@ -95,7 +94,7 @@ export function Footer() {
           <h3 className="font-heading text-lg font-semibold">Quick Navigation</h3>
           <ul className="mt-4 space-y-2.5">
             {QUICK_LINKS.map((link) => (
-              <li key={`${link.href}-${link.label}`}>
+              <li key={link.href}>
                 <Link
                   href={link.href}
                   className="text-sm text-muted-foreground transition-colors hover:text-primary"
@@ -104,14 +103,6 @@ export function Footer() {
                 </Link>
               </li>
             ))}
-            <li>
-              <Link
-                href="/about"
-                className="text-sm text-muted-foreground transition-colors hover:text-primary"
-              >
-                About Us
-              </Link>
-            </li>
           </ul>
         </nav>
 
