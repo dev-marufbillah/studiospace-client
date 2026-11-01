@@ -13,9 +13,15 @@ import { FOOTER_CATEGORIES, NAV_LINKS } from "@/lib/constants";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 
-// NAV_LINKS already contains Home, Explore Studios, How It Works and About Us.
-// (Duplicating an entry here produced duplicate React keys and duplicate links.)
-const QUICK_LINKS = NAV_LINKS;
+/**
+ * Quick navigation = the four primary nav links.
+ * Deduplicated by href so a duplicate can never produce a repeated React key
+ * (the original bug: NAV_LINKS already contained `/studios` and the footer
+ * appended it a second time, which React reported as a duplicate key).
+ */
+const QUICK_LINKS = Array.from(
+  new Map(NAV_LINKS.map((link) => [link.href, link])).values()
+);
 
 const SOCIAL_LINKS = [
   { href: "https://www.instagram.com/", label: "Instagram", icon: InstagramIcon },
