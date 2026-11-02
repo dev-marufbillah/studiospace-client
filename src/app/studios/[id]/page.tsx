@@ -223,7 +223,7 @@ export default function StudioDetailPage() {
 
           <div className="mt-6">
             <Button size="lg" className="w-full" onClick={() => setBookingOpen(true)}>
-              Book This Studio
+              Book Workspace Now
             </Button>
             <p className="mt-2 text-center text-xs text-muted-foreground">
               Instant request · host confirms your slot · price locked at booking

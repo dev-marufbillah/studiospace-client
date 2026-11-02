@@ -1,300 +1,141 @@
-# StudioSpace — Peer-to-Peer Creative Workspace & Studio Sharing Platform
+# StudioSpace — Peer-to-Peer Creative Workspace & Production Studio Sharing Platform
 
-**🔗 Live site: <https://studiospace-delta.vercel.app>**
-**🔌 Live API: <https://studiospace-api-seven.vercel.app>** · health: [`/api/health`](https://studiospace-api-seven.vercel.app/api/health)
-**🖥️ API repository:** <https://github.com/dev-marufbillah/studiospace-server>
+A market place where studio owners list creative spaces — photography cyc walls, film stages,
+podcast lounges, music suites and art workshops — and creators discover, filter, inspect and book
+them with transparent hourly pricing, deposit rules and real-time booking status.
 
-StudioSpace is a marketplace for creators — filmmakers, photographers, podcasters and musicians.
-Hosts publish cyc-wall photo studios, sound stages, podcast lounges, music suites and workshops with
-hourly rates and deposits; creators search, filter, inspect availability and reserve real time slots
-that the host then confirms.
+**🌐 Live site → <https://studiospace-delta.vercel.app>**
+**⚙️ Live API → <https://studiospace-api-seven.vercel.app/api/health>**
 
-- **Discover & book in one flow** — Swiper hero slider, six dynamically featured studios
-  (`.limit(6)`), five category tiles that deep-link into `/studios?category=…`, live search with
-  category / city / price / rating / capacity / amenity filters, four sort modes and pagination.
-- **Complete CRUD with real image uploads** — add, edit and delete studio listings (imgbb upload or
-  image URL, gallery, amenity/equipment tag editors, read-only owner name + email), managed from
-  the required **My Studio Listings** page (`/my-listings`) and — as a bonus — the *Host Panel*
-  (`/host`), every destructive action behind a custom confirm modal.
-- **Secure auth & booking lifecycle** — Better Auth email/password + Google OAuth; a signed HTTPOnly
-  JWT authorises every mutation; bookings move Pending → Confirmed → Completed / Cancelled, with
-  double-booking prevention (HTTP 409), owner-only approval (403), server-side pricing and a
-  downloadable **PDF invoice** for confirmed bookings.
-- **Built for demos, not just happy paths** — Sonner toasts everywhere (no `window.alert`), branded
-  skeletons, friendly empty states, custom 404 + error boundary, light/dark theme toggle, wishlist
-  hearts, and layouts verified on mobile, tablet and desktop.
-- **Tech stack** — Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS 4 · Better Auth
-  (MongoDB adapter) · Swiper · React Hook Form + Zod · Sonner · next-themes · jsPDF · Lucide icons ·
-  Express 5 + TypeScript + MongoDB Atlas on the API side.
+---
 
-## Examiner quick start
+## ✨ Features
 
-| Role | Email | Password | What it unlocks |
-| --- | --- | --- | --- |
-| Host (owns 6 seeded studios) | `host.test@studiospace.dev` | `Studio123` | Host Panel, My Studio Listings, confirm/decline incoming bookings |
-| Renter | `guest.test@studiospace.dev` | `Studio123` | Existing bookings, wishlist, booking flow |
+- **Home** — Swiper hero slider (3 slides, fade + autoplay, *Explore Studios* / *Host Your Space*
+  CTAs), **6 featured studios** fetched from MongoDB (`.limit(6)`, best rated first), 5 category
+  tiles that deep-link to `/studios?category=…`, a 4-step “How booking works” band and a host
+  guarantee section.
+- **Explore studios** — server-side search plus category, city, price, rating, capacity and amenity
+  filters, 4 sort modes, pagination, URL query sync and a mobile filter drawer.
+- **Studio details** — gallery carousel with thumbnails, specs, host card, amenity/equipment chips,
+  reviews with star rating, and a **“Book Workspace Now”** button that opens the booking modal.
+- **Full studio CRUD** — `/add-studio` (image upload through imgbb, gallery + amenity + equipment tag
+  editors, read-only host name/email), `/studios/edit/[id]` (pre-filled, owner only), `/my-listings`
+  (owner-scoped table with Update / Delete behind a custom confirm modal) and an owner-scoped
+  DELETE API.
+- **Bookings** — reservation saved as `Pending` with server-authoritative pricing, four status
+  states (`Pending · Confirmed · Completed · Cancelled`), cancellation with confirmation dialog and a
+  **downloadable PDF invoice** for confirmed slots. Studio owners confirm or decline requests from
+  the Host Panel (`/host`).
+- **Auth** — email/password via Better Auth + MongoDB adapter, Google OAuth, password rules
+  (uppercase + lowercase + 6 characters) enforced in the form, avatar dropdown (Dashboard · Add New
+  Studio · My Studio Listings · My Bookings · Logout) and proxy-protected private routes with a
+  `callbackUrl` round-trip, so a signed-in user is never bounced to `/login` on reload.
+- **Polish** — skeleton loaders, branded empty states with CTAs, error panels with retry, custom 404
+  page, wishlist, dark/light theme toggle, Sonner toasts everywhere (no `window.alert`, no
+  *lorem ipsum*), and a responsive layout from 360 px to 1920 px.
 
-- **Confirm a booking:** sign in as the host → `/host` (or `/dashboard`) → *Incoming reservations* →
-  a **Pending** request is already waiting (Luminous Daylight Photo Studio) → **Confirm**.
-- **Double-booking proof:** with that booking confirmed, try booking the same studio and date for an
-  overlapping time → toast *“This studio is already booked for the selected time…”* (HTTP 409).
-- **Ownership proof:** while signed in as the renter, `PATCH /api/host/bookings/<id>/status` → `401`/`403`;
-  opening `/studios/edit/<someone-else-id>` shows the “Not your listing” panel.
-- **Google login** works once `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` are set; without them the
-  button shows a friendly toast instead of failing silently.
+## 🧱 Tech stack
 
-## Who owns what — listings and booking confirmations
-
-This follows the brief exactly: **a listing belongs to the account that created it**, and the
-owner-scoped pages read that ownership from the stored `ownerId` / `ownerEmail` on the studio
-document (`/api/my-listings` filters by owner, it does not filter by role).
-
-- **My Studio Listings (`/my-listings`)** — required page: *“showing user-owned spaces (ownerEmail
-  match) with Update and Delete buttons.”* A brand-new account therefore has **0 listings** until it
-  publishes one with **Add New Studio**; the table is empty by design, not by error.
-- **Who confirms a booking?** The brief leaves booking management to the studio owner, so the
-  **owner of that listing** is the only account allowed to move a request from `Pending` to
-  `Confirmed` / `Completed`. Anyone else gets **403** (`You are not authorized to manage this
-  booking.`) and an unauthenticated request gets **401**.
-- **Host Panel (`/host`) is a bonus, not a brief requirement.** It is a convenience screen built on
-  top of the same owner-scoped data: counts of active listings / pending / confirmed / booked value,
-  status tabs and one-click Confirm · Mark completed · Decline, plus the owners' listing manager.
-  Everything it does is also reachable through the required pages (`/my-listings`,
-  `/studios/edit/[id]`, `/dashboard`).
-- **What an examiner sees:** the seeded database gives `host.test@studiospace.dev` six listings and a
-  **Pending** request, so the whole owner flow can be demonstrated without creating data first.
-
-## Step by step: try the host flow in two minutes
-
-**1 · Sign in first — every private route needs a session.**
-`/host`, `/dashboard`, `/my-listings`, `/add-studio`, `/my-bookings`, `/profile` and `/wishlist` are
-guarded by `src/proxy.ts`. Without a Better Auth cookie the page answers `307 → /login?callbackUrl=<route>`
-and returns you to the same route after signing in. Opening `/host` in a fresh window, an incognito
-tab, a different browser or after clearing cookies therefore looks like “the host panel does not
-work” — it is the login guard, not a bug.
-
-**2 · Use the seeded host.** Sign in at `/login` with `host.test@studiospace.dev` / `Studio123`. The
-navbar then shows the name and avatar, and the **Host** button (next to the theme toggle) opens
-`/host` with **6 active listings · 2 pending requests**.
-
-**3 · Publish your own listing (optional).** *Add New Studio* → fill title, category, hourly rate,
-deposit, capacity, address, overview, image URL, gallery, amenities → **Publish**. The new studio is
-owned by the account that created it and appears immediately in *My Studio Listings* (`/my-listings`)
-and in the Host Panel.
-
-**4 · Approve a reservation.** `/host` → *Incoming reservations* → **Pending** tab → **Confirm**.
-The request moves to *Confirmed*, the *Confirmed* and *Booked value* counters go up, and the slot is
-locked. **Mark completed** closes it out; **Decline** frees the slot again.
-
-**5 · Prove the rules hold.**
-| Test | Expected |
+| Layer | Choice |
 | --- | --- |
-| Renter books the same studio, same date, overlapping time after a confirmation | toast “This studio is already booked…” — HTTP **409** |
-| A different signed-in account calls `PATCH /api/host/bookings/<id>/status` | **403** `You are not authorized to manage this booking.` |
-| The same call with no cookie, or `POST /api/studios` without a cookie | **401** |
-| Opening `/studios/edit/<someone-else-id>` | “Not your listing” panel |
-| Host tries to book their own studio | **400** |
+| Frontend | Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS 4, Swiper, React Hook Form + Zod, Sonner, next-themes, jsPDF, Lucide icons |
+| Auth | Better Auth (MongoDB adapter) with a JWT stored in an **HTTPOnly** cookie |
+| Backend | Express 5, TypeScript, MongoDB Atlas, Zod validation, helmet + rate limiting |
+| Hosting | Vercel (client and API, two projects) |
 
-**If `/host` keeps bouncing to `/login`:** close every tab of the site, sign in once in a fresh
-window, make sure third-party cookies are not blocked, then retry. The route is a `307` for any
-request without a session cookie — that response is the fastest way to confirm you are simply signed out.
+## 🚀 Local setup
 
-## Local setup (two terminals)
+Two terminals — API first, then the web app.
 
 ```bash
 # 1) API — http://localhost:5001
-git clone https://github.com/dev-marufbillah/studiospace-server && cd studiospace-server
+git clone https://github.com/dev-marufbillah/studiospace-server
+cd studiospace-server
 npm install --legacy-peer-deps
-cp .env.example .env        # fill MONGODB_URI, JWT_SECRET, INTERNAL_API_SECRET
-npm run seed && npm run dev
+cp .env.example .env          # MONGODB_URI, DB_NAME, JWT_SECRET, INTERNAL_API_SECRET, IMGBB_API_KEY
+npm run dev
 
 # 2) Web — http://localhost:3000
-git clone https://github.com/dev-marufbillah/studiospace-client && cd studiospace-client
+git clone https://github.com/dev-marufbillah/studiospace-client
+cd studiospace-client
 npm install --legacy-peer-deps
-cp .env.example .env.local  # same MONGODB_URI + INTERNAL_API_SECRET, BETTER_AUTH_SECRET
+cp .env.example .env.local    # NEXT_PUBLIC_APP_URL, NEXT_PUBLIC_API_URL, BETTER_AUTH_SECRET,
+                              # MONGODB_URI, DB_NAME, INTERNAL_API_SECRET (same as server)
 npm run dev
 ```
 
----
+Optional: `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` enable the Google button
+(redirect URI `{BETTER_AUTH_URL}/api/auth/callback/google`), `IMGBB_API_KEY` enables image uploads.
+Never commit `.env` files.
 
-## Features
+## 🔑 Examiner test credentials
 
-| Area | What is implemented |
+| Role | Email | Password | What it unlocks |
+| --- | --- | --- | --- |
+| Host (owns 6 seeded studios) | `host.test@studiospace.dev` | `Studio123` | Host Panel, My Studio Listings, confirm incoming bookings |
+| Renter | `guest.test@studiospace.dev` | `Studio123` | existing bookings, wishlist, booking flow |
+
+The database also contains 12 seeded studios with real imagery, so every page has content before you
+create anything.
+
+## ✅ Requirement walkthrough (about 3 minutes)
+
+1. **Register** at `/register` → password rules are shown live → redirects to `/login`; or sign in
+   with Google.
+2. **Add a studio** as `host.test…` → `/add-studio` → upload an image, add amenities → success toast
+   → redirect to `/my-listings` where the card appears (owner-email match).
+3. **Update / Delete** from `/my-listings` → pre-filled form → toast → back to the list; Delete opens
+   a confirmation modal, then removes the document from MongoDB.
+4. **Book** as `guest.test…` → open any studio → *Book Workspace Now* → pick a date and time range →
+   the booking is stored as **Pending** and shows a status badge in `/my-bookings` with a Cancel option.
+5. **Confirm** as the host → `/host` → pending request → **Confirm** → the renter sees *Confirmed* and
+   can download the PDF invoice.
+
+**Challenge proofs**
+
+| Challenge | How to verify |
 | --- | --- |
-| Home | Swiper hero (3 slides, fade, autoplay), featured studios from the API (max 6), 5 category tiles, 4-step booking explainer, host guarantee pillars |
-| Explore | Server-side search, category/city/price/rating/capacity/amenity filters, 4 sort modes, pagination, URL query sync, mobile filter drawer, no-results state |
-| Studio detail | Gallery with thumbnails, specs, host card, amenity/equipment chips, reviews with star rating, booking modal |
-| Booking | Date + start/end time, live total preview, server-authoritative pricing, Sonner toasts, status pills, cancellation with confirm dialog, PDF invoice for confirmed bookings |
-| Hosting | **Host Panel** (`/host`, reachable from the navbar host icon) with pending-request tabs, listing manager and booked value; add studio (imgbb upload + gallery + tag editors), edit studio, my listings, delete with confirmation |
-| Account | Email/password auth (Better Auth), Google OAuth, profile editing, wishlist, theme toggle (light default), protected routes via `src/proxy.ts` |
-| States | Skeleton loaders, branded empty states, error panels with retry, custom 404, route error boundary, image fallbacks — no `window.alert` anywhere |
+| 1 · JWT in HTTPOnly cookies | `POST /api/studios` (or DELETE / POST booking) without a cookie → **401**; the cookie is `HttpOnly`, `SameSite`, not readable from JS |
+| 2 · Double-booking prevention | Confirm a booking, then request an overlapping slot on the same studio and date → **409** with a clear message |
+| 3 · Theme customisation | Toggle in the navbar switches the whole site between light and dark and persists |
+| Owner-only mutations | Another account calling `PUT /api/studios/<id>` / `PATCH /api/host/bookings/<id>/status` → **403** |
 
----
+## 🔌 API endpoints (Express)
 
-## Live tour (open these on the deployed site)
-
-| Page | Link |
-| --- | --- |
-| Home — hero slider, featured studios, categories | <https://studiospace-delta.vercel.app> |
-| Explore studios — filters, sorting, pagination | <https://studiospace-delta.vercel.app/studios> |
-| Studio detail — gallery, reviews, booking modal | <https://studiospace-delta.vercel.app/studios/6ae769176c4132584c18f934> |
-| Login / Register | <https://studiospace-delta.vercel.app/login> · <https://studiospace-delta.vercel.app/register> |
-| Host Panel (sign in as host) | <https://studiospace-delta.vercel.app/host> |
-| My Studio Listings · My Bookings · Wishlist | `/my-listings` · `/my-bookings` · `/wishlist` |
-
-Placeholder editorial imagery ships in `public/images/` (hero + one photo per category + fallback),
-so the site never shows a broken image, even offline.
-
----
-
-## Local development
-
-```bash
-npm install --legacy-peer-deps      # --legacy-peer-deps is required on npm 10.8.x
-cp .env.example .env.local          # then fill in the values below
-npm run dev                         # http://localhost:3000
-```
-
-The Express API must run at the URL in `NEXT_PUBLIC_API_URL` (default `http://localhost:5001`):
-
-```bash
-cd ../studiospace-server && npm install --legacy-peer-deps && npm run dev
-```
-
-### Scripts
-
-| Script | Purpose |
-| --- | --- |
-| `npm run dev` | Next dev server (Turbopack) |
-| `npm run build` / `npm start` | Production build / serve |
-| `npm run lint` | ESLint (Next 16 + React Compiler rules) |
-| `npm run typecheck` | `next typegen && tsc --noEmit` |
-
----
-
-## Environment variables
-
-| Variable | Required | Notes |
+| Method | Endpoint | Notes |
 | --- | --- | --- |
-| `NEXT_PUBLIC_APP_URL` | yes | Public origin, e.g. `http://localhost:3000` |
-| `NEXT_PUBLIC_API_URL` | yes | Express origin used by the rewrite proxy |
-| `API_URL` | recommended | Server-side override of the API origin (production) |
-| `BETTER_AUTH_URL` | yes | Must match the public origin |
-| `BETTER_AUTH_SECRET` | yes | `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
-| `MONGODB_URI` | yes | Same database the API uses (Better Auth adapter writes `users`) |
-| `DB_NAME` | yes | e.g. `studiospace` |
-| `INTERNAL_API_SECRET` | yes | **Must equal** the server's `INTERNAL_API_SECRET` |
-| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | optional | Enables Google login — [console.cloud.google.com](https://console.cloud.google.com/apis/credentials), redirect URI `{BETTER_AUTH_URL}/api/auth/callback/google` |
-| `IMGBB_API_KEY` / `NEXT_PUBLIC_IMGBB_API_KEY` | optional | Uploads run through the server key; the public key is only a fallback. Get one free at [api.imgbb.com](https://api.imgbb.com/) |
+| GET | `/api/studios` | search + filters + sort + pagination |
+| GET | `/api/studios/featured` | 6 highest-rated studios |
+| GET · PUT · DELETE | `/api/studios/:id` | read public, write owner-only (JWT) |
+| POST | `/api/studios` | create listing (JWT) |
+| GET | `/api/my-listings` | studios owned by the caller |
+| POST | `/api/bookings` | create reservation → `Pending` |
+| GET | `/api/my-bookings` | caller's reservations |
+| PATCH | `/api/bookings/:id` | cancel a pending booking |
+| GET · PATCH | `/api/host/bookings`, `/api/host/bookings/:id/status` | incoming requests, owner-only status changes |
+| GET · POST · DELETE | `/api/wishlist` | saved studios |
+| GET · POST · DELETE | `/api/reviews` | per-studio reviews, rating recompute |
+| POST | `/api/upload` | imgbb proxy (authenticated) |
+| POST | `/api/newsletter` | footer subscription |
+| GET · PATCH | `/api/users/me` | profile read/update |
+| GET | `/api/health` | uptime probe |
 
-Never commit `.env*` files. Only `NEXT_PUBLIC_*` variables reach the browser.
+## 🗺️ Routes
 
----
-
-## Routes
-
-**Public:** `/` · `/studios` · `/studios/[id]` · `/about` · `/how-it-works` · `/terms` · `/privacy` ·
+**Public:** `/` · `/studios` · `/studios/[id]` · `/how-it-works` · `/about` · `/terms` · `/privacy` ·
 `/login` · `/register`
 
-**Private** (proxy-protected, `callbackUrl` round-trip): `/host` · `/add-studio` · `/my-listings` ·
-`/studios/edit/[id]` · `/my-bookings` · `/dashboard` · `/profile` · `/wishlist`
+**Private:** `/dashboard` · `/add-studio` · `/my-listings` · `/studios/edit/[id]` · `/my-bookings` ·
+`/host` · `/wishlist` · `/profile`
 
-**System:** `not-found.tsx` (custom 404) · `error.tsx` · `loading.tsx` · `/api/auth/[...all]` ·
-`/api/session`
+## 📌 Notes
 
-### Navigation map
-
-```
-Navbar: Home · Explore Studios · How It Works · About Us
-        (auth) host icon → Host Panel (/host)
-        (auth) avatar → Host Panel · Dashboard · Add New Studio ·
-                         My Studio Listings · My Bookings · Wishlist · Profile · Logout
-        (guest) Log in · Sign up
-Footer: brand + mission · quick links · 6 categories · socials (IG/FB/LinkedIn/X) · newsletter
-```
-
----
-
-## Architecture notes
-
-- **Same-origin API.** The browser only calls `/api/*`. `next.config.ts` rewrites those paths to the
-  Express origin (`API_URL ?? NEXT_PUBLIC_API_URL`), excluding `/api/auth/*` and `/api/session`,
-  which are real Next route handlers.
-- **Two cookies.** Better Auth's session cookie proves identity to Next.js; a signed HTTPOnly JWT
-  (`studiospace_session`) authorises Express mutations. `POST /api/session` verifies the Better Auth
-  session, then exchanges it server-to-server (`x-internal-secret`) for the JWT.
-- **No tokens in localStorage.** `src/lib/api.ts` re-mints the JWT once on a 401 and replays the
-  request, so a page refresh never logs the user out.
-- **Proxy is not the security boundary.** `src/proxy.ts` only redirects unauthenticated navigation;
-  every Express endpoint re-verifies the JWT and ownership.
-
----
-
-## Deployment (Vercel — live)
-
-Both apps run on Vercel; the API is a single serverless function that boots the same Express app
-used locally (`api/index.js` + a `vercel.json` rewrite that forwards the original URL).
-
-1. **Web:** <https://studiospace-delta.vercel.app> — framework preset **Next.js**.
-2. **API:** <https://studiospace-api-seven.vercel.app> — Node function, `includeFiles: dist/**`.
-3. Web env: `NEXT_PUBLIC_API_URL` / `API_URL` = the API domain, `NEXT_PUBLIC_APP_URL` /
-   `BETTER_AUTH_URL` / `TRUSTED_ORIGINS` = the web domain, plus `MONGODB_URI`, `DB_NAME`,
-   `BETTER_AUTH_SECRET` and the shared `INTERNAL_API_SECRET`.
-4. API env: `MONGODB_URI`, `DB_NAME`, `JWT_SECRET`, `INTERNAL_API_SECRET`, `CLIENT_URL` = web domain.
-5. Google OAuth redirect URI: `https://studiospace-delta.vercel.app/api/auth/callback/google`.
-6. Redeploy → hard-refresh every route (no 404s, session survives reload).
-
----
-
-## Examiner / testing guide
-
-Two accounts were created through the **real registration flow** against the production database and
-are ready to use on the live site (the host already owns six listings and has bookings):
-
-| Role | Email | Password |
-| --- | --- | --- |
-| Host | `host.test@studiospace.dev` | `Studio123` |
-| Renter | `guest.test@studiospace.dev` | `Studio123` |
-
-> If you deploy against a fresh database, register new accounts instead — these two live in the
-> Atlas database the production deployment points at.
-
-**Register / log in.** `/register` → name, email, optional photo URL, password (min 6 chars, at least
-one uppercase and one lowercase) → redirected to `/login` (registration intentionally does not
-auto-login) → sign in. Google login works once `GOOGLE_CLIENT_ID`/`SECRET` are set.
-
-**Create a studio.** Log in → navbar avatar → *Add New Studio* (or `/add-studio`) → upload a cover
-image (needs `IMGBB_API_KEY`) or paste a URL → publish → redirected to `/my-listings`.
-
-**Book a studio.** Open any `/studios/[id]` → *Book This Studio* → pick a future date and times →
-total preview → *Confirm Booking* → booking appears as **Pending** in `/my-bookings`;
-`/dashboard` → *Incoming reservations* shows it for the host.
-
-**Who confirms a booking?** There is no separate admin panel: the **host who owns the
-studio** confirms it. Sign in as `host.test@studiospace.dev` → `/host` (or `/dashboard`) →
-*Incoming reservations* → **Confirm** (or *Decline*). That account already owns six seeded
-studios (Luminous Daylight, Sound Stage One, The Quiet Room, Harmony Recording Suite,
-Terracotta Art Workshop, Atelier Creative Workspace) and has a **Pending** request waiting,
-so the reviewer can complete the full lifecycle without setting anything up.
-
-**Owner permissions.** As the host, confirm the request. As another account, try
-`PATCH /api/host/bookings/<id>/status` with your own booking → `403`. Editing someone else's studio
-via `/studios/edit/<their-id>` shows the “Not your listing” panel.
-
-**Double-booking.** With booking A confirmed (10:00–13:00), request 12:00–15:00 for the same studio
-and date → toast shows *“This studio is already booked for the selected time. Please choose another
-time slot.”* (HTTP 409). 15:00–17:00 succeeds. Cancelling A frees the slot again.
-
-**JWT protection.** `curl -X POST http://localhost:3000/api/studios -H 'Content-Type: application/json' -d '{}'`
-→ `401`. A tampered cookie value also returns `401` (`Invalid authentication token.`).
-
----
-
-## Known limitations
-
-- Payments are not processed — deposits and totals are calculated and recorded only.
-- Newsletter signup stores the email in the API's `newsletter` collection; no email is sent.
-- Google login requires your own OAuth credentials.
-- 15 lint warnings remain, all from the React Compiler advisory
-  (`react-hooks/set-state-in-effect`) and React Hook Form's `watch()` — documented in
-  `eslint.config.mjs`; there are 0 lint **errors**.
+- Private routes are guarded by `src/proxy.ts`; a request without a session cookie gets
+  `307 → /login?callbackUrl=<route>` and returns to that route after signing in.
+- Ownership is data-driven: a listing belongs to the account that created it (`ownerId` /
+  `ownerEmail`), so any signed-in user can become a host by publishing a studio — no role switch.
+- Every mutation re-verifies the HTTPOnly JWT on the Express side; the client never sends an owner id
+  in a request body.
+- Booking price is recomputed on the server (`hourlyRate × hours + securityDeposit`), never trusted
+  from the browser.
